@@ -1,0 +1,92 @@
+---
+title: "relatorio_presidencia"
+author: "euler"
+date: "19/11/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message=FALSE,
+                      warning=FALSE,
+                      echo = FALSE)
+
+library(dplyr)
+library(janitor)
+library(readxl)
+library(gdata)
+
+source("../99-funcao_litigantes.R")
+```
+
+## Acervo ao longo dos anos
+
+
+```{r acervo_geral}
+acervo_total <- readRDS(file="../02-data-raw/acervo_total.rds")
+
+# Acervo por ano
+acervo_total %>% 
+  group_by(base) %>% 
+  summarise(qtd_acervo = n()) %>% 
+  left_join(
+    # Acervo do Min. Presidente
+    acervo_total %>% 
+      filter(relator_atual == "MINISTRO PRESIDENTE") %>% 
+      group_by(base) %>% 
+      summarise(qtd_presid = n()),
+    by = "base"
+  )  %>% 
+  mutate(perc = paste0(round(qtd_presid/qtd_acervo,3)*100,"%")) %>% 
+  knitr::kable()
+
+```
+
+## Acervo por classe
+
+```{r acervo_classe}
+# Acervo por classe
+acervo_total %>% 
+  group_by(base, classe) %>% 
+  summarise(n = n()) %>%
+  tidyr::pivot_wider(
+    names_from = base,
+    values_from = n
+  ) %>% 
+  knitr::kable()
+```
+
+
+## Maiores Litigantes
+
+### 50 maiores litigantes em 2017
+```{r litigante2017}
+# Litigantes 2017
+litigantes("acervo2017") %>% 
+  knitr::kable()
+```
+
+
+### 50 maiores litigantes em 2018
+```{r litigante2018}
+# Litigantes 2018
+litigantes("acervo2018") %>% 
+  knitr::kable()
+
+```
+
+
+### 50 maiores litigantes em 2019
+```{r litigante2019}
+# Litigantes 2019
+litigantes("acervo2019") %>% 
+  knitr::kable()
+```
+
+
+### 50 maiores litigantes em 2020
+```{r litigante2020}
+# Litigantes 2020
+litigantes("acervo2020") %>% 
+  knitr::kable()
+```
